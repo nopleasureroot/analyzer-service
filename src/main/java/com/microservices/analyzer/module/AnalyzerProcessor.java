@@ -1,6 +1,7 @@
 package com.microservices.analyzer.module;
 
 import com.microservices.analyzer.db.TargetRepository;
+import com.microservices.analyzer.mapper.TargetMapper;
 import com.microservices.analyzer.model.kafka.DataConsumedEvent;
 import com.microservices.analyzer.model.kafka.DataProducedEvent;
 import com.microservices.analyzer.module.producer.Producer;
@@ -14,12 +15,13 @@ import org.springframework.stereotype.Component;
 public class AnalyzerProcessor {
     private final TargetRepository targetRepository;
     private final Producer producer;
+    private final TargetMapper targetMapper;
 
     @KafkaListener(topics = "${spring.kafka.consumer-default-topic}", groupId = "${spring.kafka.consumer.group-id}",
         containerFactory = "kafkaMessageContainerFactory")
     public void analyze(@Payload DataConsumedEvent event) {
         targetRepository.findByUuid(event.uuid())
-            .map(target -> target.getRuleValue() < event.product().price())
+            .map(target -> target.getRuleValue() > event.product().price())
             .ifPresent(state -> {
                 if (state) {
                     producer.execute(DataProducedEvent.builder()
@@ -30,6 +32,7 @@ public class AnalyzerProcessor {
                             .price(event.product().price())
                             .build())
                         .build());
+                targetRepository.save(targetMapper.updateEntity(targetRepository.findByUuid(event.uuid()).get(),"STOPPED"));
                 }
             });
     }

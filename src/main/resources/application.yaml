@@ -8,9 +8,9 @@ spring:
     generate-ddl: true
   kafka:
     consumer-default-topic: ${DEFAULT_CONSUMER_TOPIC_NAME:handler_analyzer_processed-data-event}
-    producer-default-topic: ${DEFAULT_PRODUCER_TOPIC_NAME:analyzer_messenger_full-processed-data-event}
+    producer-default-topic: ${DEFAULT_PRODUCER_TOPIC_NAME:analyzed-messages}
     consumer:
-      group-id: ${MESSAGE_CONSUMER_GROUP:app.analyzer}
+      group-id: ${MESSAGE_CONSUMER_GROUP:app.2}
       bootstrap-servers: ${BOOTSTRAP_HOST:localhost:29092}
 server:
-  port: 8098
+  port: 8085
